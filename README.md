@@ -46,30 +46,30 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 
 **Project Structure**
 us-traffic-accident-analysis/
-├── data/
-│   └── raw/                        # Original dataset (not tracked in git)
-├── glue_jobs/
-│   ├── etl_clean_transform.py      # Main Glue PySpark ETL job
-│   ├── feature_engineering.py      # Derived feature creation
-│   └── partition_writer.py         # Writes partitioned Parquet to S3
-├── athena/
-│   ├── create_tables.sql           # DDL for Athena external tables
-│   ├── analysis_queries.sql        # Key analytical SQL queries
-│   └── views.sql                   # Reusable Athena views
-├── notebooks/
-│   ├── eda.ipynb                   # Exploratory data analysis
-│   └── visualizations.ipynb        # Local chart prototyping
-├── quicksight/
-│   └── dashboard_config.json       # QuickSight dataset/analysis config
-├── infrastructure/
-│   ├── s3_setup.sh                 # S3 bucket creation script
-│   ├── glue_setup.py               # Glue crawler and job registration
-│   └── iam_policies.json           # Least-privilege IAM role policies
-├── tests/
-│   └── test_etl.py                 # Unit tests for ETL logic
-├── requirements.txt
-├── README.md
-└── .gitignore
+- ├── data/
+- │   └── raw/                        # Original dataset (not tracked in git)
+- ├── glue_jobs/
+- │   ├── etl_clean_transform.py      # Main Glue PySpark ETL job
+- │   ├── feature_engineering.py      # Derived feature creation
+- │   └── partition_writer.py         # Writes partitioned Parquet to S3
+- ├── athena/
+- │   ├── create_tables.sql           # DDL for Athena external tables
+- │   ├── analysis_queries.sql        # Key analytical SQL queries
+- │   └── views.sql                   # Reusable Athena views
+- ├── notebooks/
+- │   ├── eda.ipynb                   # Exploratory data analysis
+- │   └── visualizations.ipynb        # Local chart prototyping
+- ├── quicksight/
+- │   └── dashboard_config.json       # QuickSight dataset/analysis config
+- ├── infrastructure/
+- │   ├── s3_setup.sh                 # S3 bucket creation script
+- │   ├── glue_setup.py               # Glue crawler and job registration
+- │   └── iam_policies.json           # Least-privilege IAM role policies
+- ├── tests/
+- │   └── test_etl.py                 # Unit tests for ETL logic
+- ├── requirements.txt
+- ├── README.md
+- └── .gitignore
 
 **Key Analytical Questions**
 1. Severity Distribution — What proportion of accidents fall into each severity tier (1–4), and how does the distribution vary across states and years?
