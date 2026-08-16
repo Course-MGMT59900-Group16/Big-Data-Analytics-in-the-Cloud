@@ -6,23 +6,27 @@ This project delivers a cloud-native, end-to-end big data pipeline designed to a
 
 **Dataset**
 The dataset used in this project is the U.S. Accidents (2016–2023) dataset, a large-scale nationwide traffic incident repository containing 7,728,394 accident records collected from February 2016 through March 2023. It provides a comprehensive view of roadway incidents across 49 U.S. states, capturing detailed information on accident severity, timestamps, geographic coordinates, roadway characteristics, and weather conditions. The dataset was originally published on Kaggle and aggregates real-time traffic incident feeds from multiple APIs, including:
-  o	State Departments of Transportation
-  o	U.S. Department of Transportation
-  o	Law enforcement agencies
-  o	Traffic cameras
-  o	Roadway sensors embedded throughout the national road network
+
+  -	State Departments of Transportation
+  -	U.S. Department of Transportation
+  -	Law enforcement agencies
+  -	Traffic cameras
+  -	Roadway sensors embedded throughout the national road network
+  
 This multi-source integration ensures broad coverage and high temporal resolution, making the dataset suitable for large-scale analytics and cloud-based processing.
 
 **Data Attributes**
 The dataset contains 46 attributes, each contributing to a multidimensional understanding of accident conditions:
-Table 1: Data Attributes
-Identifiers:	Accident ID (unique identifier)
-Spatial Fields:	Start_Lat, Start_Lng (geographic coordinates)
-Temporal Fields:	Start_Time, End_Time, accident_year, accident_month, accident_hour, accident_weekday
-Environmental Variables:	Temperature (°F), Visibility (mi), Wind_Speed (mph), Weather_Condition, Precipitation
-Roadway Features:	Junction, Traffic_Signal, Crossing, Roundabout, Railway
-Severity:	Severity (1–4 scale measuring traffic disruption)
-Additional Features:	Twilight indicators, amenity markers, airport, bump, stop sign
+
+- Data Attributes
+  
+1. Identifiers:	Accident ID (unique identifier)
+2. Spatial Fields:	Start_Lat, Start_Lng (geographic coordinates)
+3. Temporal Fields:	Start_Time, End_Time, accident_year, accident_month, accident_hour, accident_weekday
+4. Environmental Variables:	Temperature (°F), Visibility (mi), Wind_Speed (mph), Weather_Condition, Precipitation
+5. Roadway Features:	Junction, Traffic_Signal, Crossing, Roundabout, Railway
+6. Severity:	Severity (1–4 scale measuring traffic disruption)
+7. Additional Features:	Twilight indicators, amenity markers, airport, bump, stop sign
 
 **Cloud Ingestion Strategy**
 To support the project's analytical goals, the raw CSV files were ingested into a cloud-native medallion architecture built on Amazon Web Services (AWS):
@@ -32,17 +36,21 @@ To support the project's analytical goals, the raw CSV files were ingested into 
    
 **Data Quality Validation**
 During validation, the project confirmed:
-•	Zero duplicate IDs across all 7.7 million records, ensuring primary-key integrity
-•	Complete geographic fields with valid starting coordinates
-•	Complete temporal fields (start_time and state) across all records
-•	28.5% missing precipitation values, intentionally preserved as NULL rather than imputed to avoid distorting weather-related analyses
-•	Partial year 2023 (only January–March), excluded from year-over-year comparisons
+- Zero duplicate IDs across all 7.7 million records, ensuring primary-key integrity
+-	Complete geographic fields with valid starting coordinates
+-	Complete temporal fields (start_time and state) across all records
+-	28.5% missing precipitation values, intentionally preserved as NULL rather than imputed to avoid distorting weather-related analyses
+-	Partial year 2023 (only January–March), excluded from year-over-year comparisons
+
 This dataset serves as the foundation for identifying meaningful patterns in U.S. traffic accidents, ultimately contributing to safer and more resilient transportation systems nationwide
 
 **Architecture diagram**
 The following architecture illustrates the end-to-end AWS medallion pipeline used to process the U.S. Accidents dataset and transform 7.7 million raw records into analytics-ready insights.
-Figure 1: Medallion Architecture Implementation: Ingestion to Visualization
+
+- Medallion Architecture Implementation: Ingestion to Visualization
+  
 <img width="841" height="443" alt="image" src="https://github.com/user-attachments/assets/92a8d342-f07f-4503-84d5-4872465e3b6c" />
+
 The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catalogs its schema into the AWS Glue Data Catalog. The registered AWS Glue ETL job — written in PySpark — reads from the raw bucket, performs cleaning, standardization, and feature engineering, and writes columnar Parquet output partitioned by state and year to the S3 Processed Bucket. A second Glue Crawler refreshes the Data Catalog to reflect new partitions, making them immediately queryable in Amazon Athena using standard SQL—no infrastructure to provision. Analytical results and aggregated query outputs are connected to Amazon QuickSight for dashboard-level visualization. Glue Workflows and Triggers automate the entire pipeline, and all job logs and metrics stream to AWS CloudWatch for observability and alerting.
 
 **Project Structure**
@@ -83,8 +91,8 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 **ETL Pipeline Details**
 
 **1- Data Ingestion**
-Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Bucket using the AWS CLI or the S3 console.
-A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
+- Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Bucket using the AWS CLI or the S3 console.
+- A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
 
 **Cleaning & Transformation (PySpark / AWS Glue)**
 1. Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
@@ -116,6 +124,7 @@ WHERE accident_year <> '2023'
 GROUP BY accident_year
 ORDER BY accident_year;
 - Annual Accident Trends (2016-2022)
+  
 <img width="783" height="201" alt="image" src="https://github.com/user-attachments/assets/d6f2f044-99d4-43bb-a17d-ee2a90dc60ef" />
 
 - Insight: Accident volume increased steadily from 2016 to 2022, with 2022 recording the highest count at 1.76 million incidents, a 329% increase over 2016 levels.
@@ -132,7 +141,7 @@ FROM group16_accidents.silver_us_accidents
 WHERE accident_year <> '2023'
 GROUP BY accident_month
 ORDER BY accident_month;
-<img width="626" height="348" alt="image" src="https://github.com/user-attachments/assets/cb35d1b5-cdc7-490e-91bc-5760608acc1f" />
+
 - Monthly Accident Patterns and Severity Rates
 <img width="622" height="313" alt="image" src="https://github.com/user-attachments/assets/ad08222d-57ae-40cb-8d00-2d875f95b740" />
 
@@ -154,8 +163,11 @@ FROM group16_accidents.silver_us_accidents
 WHERE accident_year <> '2023'
 GROUP BY 1
 ORDER BY total_accidents DESC;
+
 - Seasonal Accident Patterns and Severity Rates
+  
 <img width="761" height="133" alt="image" src="https://github.com/user-attachments/assets/163cf4e0-48ea-4734-9fd1-385bd211548a" />
+
 - Key Insight: While fall and winter account for the highest accident volumes, summer experiences the highest severe disruption rate (23.06%).
    
 3. Athena Query 3: Day-of-Week Patterns to identify accident patterns by day of week
@@ -170,8 +182,11 @@ ORDER BY total_accidents DESC;
 FROM group16_accidents.silver_us_accidents
 GROUP BY accident_weekday
 ORDER BY total_accidents DESC;
+
 - Day-of-Week Accident Patterns
+  
 <img width="759" height="234" alt="image" src="https://github.com/user-attachments/assets/715b3156-e0bd-4391-ba90-c1ea4905f243" />
+
 - Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
   
 4. Athena Query 4: Hour-of-Day Patterns to identify commute-hour accident patterns
@@ -189,6 +204,7 @@ ORDER BY accident_hour;
 
 - Hourly Accident Patterns and Severity Rates
 <img width="766" height="587" alt="image" src="https://github.com/user-attachments/assets/e02b42c7-26a3-4e08-b0fe-a8a2fbae56fe" />
+
 - Key Insight: Rush-hour periods (7-8 AM, 4-5 PM) account for largest accident volumes, but late-night/early-morning hours (4 AM) have the highest severity rates (21.40%).
   
 5- Athena Query 5: Roadway Feature Associations to identify roadway infrastructure risk factors
@@ -230,7 +246,8 @@ SELECT
 - Roadway Feature Risk Analysis
   
 <img width="759" height="105" alt="image" src="https://github.com/user-attachments/assets/577ea764-459c-4940-b63a-f9765921df89" />
-Key Insight: Junctions have the highest severe disruption rate (26.79%), far exceeding traffic signals (9.51%) and crossings (7.04%).   
+
+- Key Insight: Junctions have the highest severe disruption rate (26.79%), far exceeding traffic signals (9.51%) and crossings (7.04%).   
 
 **QuickSight Dashboard**
 The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
