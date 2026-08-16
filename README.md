@@ -4,14 +4,13 @@ Cloud-Based Analysis of U.S. Traffic Accident Patterns
 **Project Overview:** 
 This project delivers a cloud-native, end-to-end big data pipeline designed to analyze U.S. traffic accident data at scale, leveraging the full breadth of the AWS ecosystem. The primary goal is to transform raw accident records into actionable intelligence covering accident severity, geographic distribution, temporal patterns, and the influence of weather and road conditions on crash outcomes. The analysis is grounded in the US Accidents dataset (Kaggle / Sobhan Moosavi et al.), comprising approximately 7.7 million records spanning 49 U.S. states from 2016 to 2023 across 46 feature columns. The pipeline progresses through four well-defined phases — raw data ingestion into Amazon S3, distributed ETL transformation via AWS Glue (PySpark), serverless SQL querying with Amazon Athena, and interactive visualization through Amazon QuickSight — culminating in a reproducible, scalable analytical platform suitable for academic evaluation, operational deployment, and further extension.
   
-**Setup & Deployment**
--** Prerequisites**
+**Setup & Deployment: Prerequisites**
 - Active AWS account with IAM permissions for S3, Glue, Athena, QuickSight, and CloudWatch.
 - Python 3.8+ with the following packages: boto3, pyspark, pandas, pyarrow.
 - AWS CLI installed and configured via aws configure with appropriate access key and region.
 - Kaggle API access to download the US Accidents dataset.
-- 
-** Deployment Steps**
+  
+**Deployment Steps**
   
 - Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
 - Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
