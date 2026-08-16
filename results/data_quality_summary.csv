@@ -1,0 +1,10 @@
+metric,records,pct_of_dataset
+Total records,7728394,100.0
+Duplicate IDs,0,0.0
+Missing precipitation,2203586,28.51
+Missing weather condition,173459,2.24
+Missing visibility,177098,2.29
+Missing temperature,163853,2.12
+Missing start_time,0,0.0
+Missing state,0,0.0
+Invalid starting coordinates,0,0.0

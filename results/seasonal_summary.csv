@@ -1,0 +1,5 @@
+season,months_included,total_accidents,high_impact_accidents,high_impact_pct
+Fall,"Sep, Oct, Nov",2086676,383322,18.37
+Winter,"Dec, Jan, Feb",2041827,365691,17.91
+Summer,"Jun, Jul, Aug",1683374,388186,23.06
+Spring,"Mar, Apr, May",1669884,359693,21.54

@@ -1,0 +1,11 @@
+weather_condition,total_accidents,high_impact_accidents,high_impact_pct,avg_visibility_mi
+Scattered Clouds,204829,72008,35.16,10.05
+Overcast,382866,133813,34.95,8.67
+Clear,808743,271435,33.56,9.86
+Heavy Rain,32309,7983,24.71,2.33
+Light Drizzle,22684,5496,24.23,5.31
+Rain,84331,20260,24.02,4.06
+Light Rain,352957,80457,22.8,6.84
+MISSING/BLANK,173459,37724,21.75,9.47
+Mostly Cloudy,1016195,212784,20.94,9.86
+Light Snow,128680,26891,20.9,3.05
