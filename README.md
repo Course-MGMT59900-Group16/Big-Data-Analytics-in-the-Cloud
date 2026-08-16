@@ -4,14 +4,14 @@ Cloud-Based Analysis of U.S. Traffic Accident Patterns
 **Project Overview:** 
 This project delivers a cloud-native, end-to-end big data pipeline designed to analyze U.S. traffic accident data at scale, leveraging the full breadth of the AWS ecosystem. The primary goal is to transform raw accident records into actionable intelligence covering accident severity, geographic distribution, temporal patterns, and the influence of weather and road conditions on crash outcomes. The analysis is grounded in the US Accidents dataset (Kaggle / Sobhan Moosavi et al.), comprising approximately 7.7 million records spanning 49 U.S. states from 2016 to 2023 across 46 feature columns. The pipeline progresses through four well-defined phases — raw data ingestion into Amazon S3, distributed ETL transformation via AWS Glue (PySpark), serverless SQL querying with Amazon Athena, and interactive visualization through Amazon QuickSight — culminating in a reproducible, scalable analytical platform suitable for academic evaluation, operational deployment, and further extension.
   
-**-Setup & Deployment**
+**Setup & Deployment**
 -** Prerequisites**
 - Active AWS account with IAM permissions for S3, Glue, Athena, QuickSight, and CloudWatch.
 - Python 3.8+ with the following packages: boto3, pyspark, pandas, pyarrow.
 - AWS CLI installed and configured via aws configure with appropriate access key and region.
 - Kaggle API access to download the US Accidents dataset.
 - 
-**- Deployment Steps**
+** Deployment Steps**
   
 - Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
 - Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
@@ -130,22 +130,22 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 
 **ETL Pipeline Details**
 
-**1- Data Ingestion**
+**Data Ingestion**
 - Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Bucket using the AWS CLI or the S3 console.
 - A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
 
 **Cleaning & Transformation (PySpark / AWS Glue)**
-1. Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
-2. Standardize timestamp fields: parse Start_Time and End_Time to UTC, then extract derived columns: hour, day_of_week, month, and year.
-3. Normalize free-text fields: apply .trim().lower() to Weather_Condition and City, then map common variant spellings to canonical values (e.g., "Light Rain" → "light rain").
-4. Cast all boolean road-feature columns (Junction, Traffic_Signal, Crossing, etc.) from string to native boolean type.
-5. Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
+- Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
+- Standardize timestamp fields: parse Start_Time and End_Time to UTC, then extract derived columns: hour, day_of_week, month, and year.
+- Normalize free-text fields: apply .trim().lower() to Weather_Condition and City, then map common variant spellings to canonical values (e.g., "Light Rain" → "light rain").
+- Cast all boolean road-feature columns (Junction, Traffic_Signal, Crossing, etc.) from string to native boolean type.
+- Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
 
 **Feature Engineering**
-1. duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
-2. is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
-3. severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
-4. season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
+- duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
+- is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
+- severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
+- season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
 
 **Output**
 
@@ -153,7 +153,7 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 - A second Glue Crawler runs post-ETL to update the Data Catalog with all new partitions, ensuring Athena queries immediately reflect the latest data without requiring manual partition registration.
   
 **Sample Athena Queries and results **
-1. Athena Query 1: Accident Trend Over Time to identify year-over-year accident volume trends
+- **Athena Query 1**: Accident Trend Over Time to identify year-over-year accident volume trends
 - Accident Trend Over Time to identify year-over-year accident volume trends
   
 SELECT
@@ -169,7 +169,8 @@ ORDER BY accident_year;
 
 - Insight: Accident volume increased steadily from 2016 to 2022, with 2022 recording the highest count at 1.76 million incidents, a 329% increase over 2016 levels.
 
-2. Athena Query 2: Seasonal Patterns to identify monthly and seasonal accident patterns with severity rates
+- **Athena Query 2**: Seasonal Patterns to identify monthly and seasonal accident patterns with severity rates
+  
 SELECT
     accident_month,
     COUNT(*) AS total_accidents,
@@ -210,7 +211,7 @@ ORDER BY total_accidents DESC;
 
 - Key Insight: While fall and winter account for the highest accident volumes, summer experiences the highest severe disruption rate (23.06%).
    
-3. Athena Query 3: Day-of-Week Patterns to identify accident patterns by day of week
+- **Athena Query 3**: Day-of-Week Patterns to identify accident patterns by day of week
 
  SELECT
     accident_weekday,
@@ -228,8 +229,8 @@ ORDER BY total_accidents DESC;
 <img width="759" height="234" alt="image" src="https://github.com/user-attachments/assets/715b3156-e0bd-4391-ba90-c1ea4905f243" />
 
 - Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
-  
-4. Athena Query 4: Hour-of-Day Patterns to identify commute-hour accident patterns
+
+- ** Athena Query 4**: Hour-of-Day Patterns to identify commute-hour accident patterns
   
 SELECT
     accident_hour,
@@ -247,7 +248,7 @@ ORDER BY accident_hour;
 
 - Key Insight: Rush-hour periods (7-8 AM, 4-5 PM) account for largest accident volumes, but late-night/early-morning hours (4 AM) have the highest severity rates (21.40%).
   
-5- Athena Query 5: Roadway Feature Associations to identify roadway infrastructure risk factors
+- ** Athena Query 5**: Roadway Feature Associations to identify roadway infrastructure risk factors
 
 SELECT
     'Junction' AS roadway_feature,
@@ -326,7 +327,7 @@ SELECT
 <img width="975" height="434" alt="image" src="https://github.com/user-attachments/assets/4f168477-0aaf-4257-a550-8423d2eae828" />
 
 - Key Insight: Overcast and scattered cloudy skies show the highest high-impact disruption percentages (34.95-35.16%), while highway junctions show far higher severe disruption rates (26.79%) than standard traffic signals (9.51%) or pedestrian crossings (7.04%). These correlations highlight compounding disruption risks rather than direct causation.
-- 
+
 **- Key Takeaways and Future Work**
 1.	Cloud-Native Processing is Essential: Traditional desktop tools cannot handle 7.7 million records efficiently. Our serverless AWS pipeline achieved a 99.99% reduction in query scan volume through proper partition optimization.
 2.	Volume ≠ Severity: High-volume regions and periods do not necessarily correlate with severe disruptions. Transportation agencies must analyze both dimensions separately.
@@ -336,11 +337,15 @@ SELECT
 
 **- Limitations, risks, and future improvements**
 - Current Limitations and Risks
+  
 <img width="769" height="278" alt="image" src="https://github.com/user-attachments/assets/f4e6b131-4791-4e4f-8ca2-b815dde13e09" />
 
 - Future Improvements Roadmap
+  
 <img width="975" height="439" alt="image" src="https://github.com/user-attachments/assets/f48e8802-8537-497b-9a00-04a599190608" />
+
 - Future Improvements
+  
 <img width="760" height="355" alt="image" src="https://github.com/user-attachments/assets/39cebc73-fb3f-4211-866f-faa777f08f2a" />
 
 **Future Enhancements**
