@@ -34,6 +34,7 @@ This project delivers a cloud-native, end-to-end big data pipeline designed to a
 - SQL	Ad-hoc analytical querying and view creation within Amazon Athena
   
 **QuickSight Dashboard**
+
 The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
 
 - **Component and	Description**
@@ -45,6 +46,7 @@ The Amazon QuickSight dashboard serves as the primary analytical interface for n
 - Interactive Filters:	State, Year, Severity (multi-select), and Weather Condition — applied globally across all dashboard visuals.
   
 **Dataset**
+
 The dataset used in this project is the U.S. Accidents (2016–2023) dataset, a large-scale nationwide traffic incident repository containing 7,728,394 accident records collected from February 2016 through March 2023. It provides a comprehensive view of roadway incidents across 49 U.S. states, capturing detailed information on accident severity, timestamps, geographic coordinates, roadway characteristics, and weather conditions. The dataset was originally published on Kaggle and aggregates real-time traffic incident feeds from multiple APIs, including:
 
   -	State Departments of Transportation
@@ -56,6 +58,7 @@ The dataset used in this project is the U.S. Accidents (2016–2023) dataset, a 
 This multi-source integration ensures broad coverage and high temporal resolution, making the dataset suitable for large-scale analytics and cloud-based processing.
 
 **Data Attributes**
+
 The dataset contains 46 attributes, each contributing to a multidimensional understanding of accident conditions:
 
 - Data Attributes
@@ -74,8 +77,7 @@ To support the project's analytical goals, the raw CSV files were ingested into 
 2.	Silver Layer: Transformed into cleaned and enriched Parquet format, partitioned by accident year and state
 3.	Gold Layer: Pre-aggregated analytical tables optimized for business intelligence queries
    
-**Data Quality Validation**
-During validation, the project confirmed:
+**Data Quality Validation, During validation, the project confirmed**:
 - Zero duplicate IDs across all 7.7 million records, ensuring primary-key integrity
 -	Complete geographic fields with valid starting coordinates
 -	Complete temporal fields (start_time and state) across all records
@@ -85,6 +87,7 @@ During validation, the project confirmed:
 This dataset serves as the foundation for identifying meaningful patterns in U.S. traffic accidents, ultimately contributing to safer and more resilient transportation systems nationwide
 
 **Architecture diagram**
+
 The following architecture illustrates the end-to-end AWS medallion pipeline used to process the U.S. Accidents dataset and transform 7.7 million raw records into analytics-ready insights.
 
 - Medallion Architecture Implementation: Ingestion to Visualization
@@ -142,10 +145,10 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 - Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
 
 **Feature Engineering**
-- duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
-- is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
-- severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
-- season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
+- Duration_minutes: Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
+- Is_rush_hour: Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
+- Severity_label: Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
+- Season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
 
 **Output**
 
