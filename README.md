@@ -96,6 +96,10 @@ The following architecture illustrates the end-to-end AWS medallion pipeline use
 
 The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catalogs its schema into the AWS Glue Data Catalog. The registered AWS Glue ETL job — written in PySpark — reads from the raw bucket, performs cleaning, standardization, and feature engineering, and writes columnar Parquet output partitioned by state and year to the S3 Processed Bucket. A second Glue Crawler refreshes the Data Catalog to reflect new partitions, making them immediately queryable in Amazon Athena using standard SQL—no infrastructure to provision. Analytical results and aggregated query outputs are connected to Amazon QuickSight for dashboard-level visualization. Glue Workflows and Triggers automate the entire pipeline, and all job logs and metrics stream to AWS CloudWatch for observability and alerting.
 
+End-to-End AWS Serverless Data Pipeline for US Accidents Analytics
+
+<img width="769" height="693" alt="image" src="https://github.com/user-attachments/assets/ee7ee479-dd32-44d0-adc1-dba03bd7f78f" />
+
 **Project Structure**
 - us-traffic-accident-analysis/
 - ├── data/
@@ -133,9 +137,44 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 
 **ETL Pipeline Details**
 
-**Data Ingestion**
-- Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Bucket using the AWS CLI or the S3 console.
-- A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
+**Data ingestion, storage, transformation, and quality plan**
+- Ingestion Strategy.
+  
+The raw US_Accidents_March23.csv file (approximately 3.06 GB) was uploaded to Amazon S3 using the AWS CLI. The Bronze layer preserves the original CSV unchanged, providing:
+-	Traceability: Ability to reprocess from the original source
+-	Reproducibility: Complete audit trail of transformations
+-	Disaster recovery: Raw data remains intact for restoration.
+
+Storage Architecture
+
+<img width="672" height="197" alt="image" src="https://github.com/user-attachments/assets/112c22e1-71a4-415f-8307-bbbcafb36f56" />
+
+-	Transformation Process: From Bronze to Silver
+
+The AWS Glue ETL PySpark job performs the following transformations:
+1.	Column Standardization: Standardizes column names (lowercase, underscores)
+2.	Timestamp Parsing: Converts Start_Time and End_Time to proper timestamp format
+3.	Derived Feature Creation: Extracts accident_year, accident_month, accident_hour, accident_weekday
+4.	Validation Flags: Creates data quality indicators for each record
+5.	High_Impact Classification: Binary flag (Severity 3–4 = 1, Severity 1–2 = 0)
+6.	Data Type Optimization: Converts strings to appropriate numeric/timestamp types
+7.	Format Conversion: Convert CSV files to Snappy-compressed Parquet format for efficient columnar storage
+
+- Data Quality Validation Framework
+
+The ETL process implements comprehensive data quality validation:
+
+<img width="759" height="135" alt="image" src="https://github.com/user-attachments/assets/a3870c16-d9af-44fe-afc3-b2cb8288ed47" />
+
+-	Performance Optimization
+  
+The transformation from Bronze to Silver achieved significant performance gains:
+- File Format: CSV → Snappy-compressed Parquet
+-	Partitioning: accident_year and state subdirectories
+-	Compression: Snappy for balanced compression/performance
+Performance Validation: An identical Athena query filtered by state and timeframe scanned:
+-	Bronze: 2.85 GB
+-	Silver: 8.58 KB (99.99% reduction in data scanned)
 
 **Cleaning & Transformation (PySpark / AWS Glue)**
 - Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
@@ -144,13 +183,28 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 - Cast all boolean road-feature columns (Junction, Traffic_Signal, Crossing, etc.) from string to native boolean type.
 - Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
 
-**Feature Engineering**
+**Data model, query design, or analytics workflow**
+
+**Data Model Overview**
+
+The Silver layer serves as the central analytical dataset, containing cleaned and enriched accident records with derived features for analysis:
+
+Key Fields:
+-	id: Unique accident identifier (business key)
+-	start_time, end_time: Incident timestamps
+-	accident_year, accident_month, accident_hour, accident_weekday: Derived temporal features
+-	state, county: Geographic dimensions
+-	severity: Traffic disruption severity (1-4)
+-	high_impact: Binary classification (Severity 3-4)
+-	temperature, visibility, wind_speed, weather_condition: Environmental factors
+-	junction, traffic_signal, crossing, roundabout: Roadway features
+
 - Duration_minutes: Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
 - Is_rush_hour: Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
 - Severity_label: Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
 - Season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
 
-**Output**
+**Query Design and Analytics Workflow**
 
 - Write the transformed dataset to the S3 Processed Bucket in Parquet format, partitioned by state then year (e.g., s3://processed-bucket/accidents/state=CA/year=2022/).
 - A second Glue Crawler runs post-ETL to update the Data Catalog with all new partitions, ensuring Athena queries immediately reflect the latest data without requiring manual partition registration.
@@ -166,6 +220,7 @@ FROM group16_accidents.silver_us_accidents
 WHERE accident_year <> '2023'
 GROUP BY accident_year
 ORDER BY accident_year;
+
 - Annual Accident Trends (2016-2022)
   
 <img width="783" height="201" alt="image" src="https://github.com/user-attachments/assets/d6f2f044-99d4-43bb-a17d-ee2a90dc60ef" />
@@ -187,6 +242,7 @@ GROUP BY accident_month
 ORDER BY accident_month;
 
 - Monthly Accident Patterns and Severity Rates
+  
 <img width="622" height="313" alt="image" src="https://github.com/user-attachments/assets/ad08222d-57ae-40cb-8d00-2d875f95b740" />
 
 - Seasonal Aggregation Query
