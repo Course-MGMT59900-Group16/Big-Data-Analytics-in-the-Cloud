@@ -78,11 +78,15 @@ us-traffic-accident-analysis/
 4- Weather Impact — Which weather conditions (e.g., fog, ice, rain) correlate most strongly with high-severity accidents, controlling for exposure?
 5- Road Feature Correlation — Do the presence of junctions, crossings, and traffic signals meaningfully increase or decrease accident severity outcomes?
 6- Year-over-Year Trends — How has the national accident rate and average severity evolved from 2016 to 2023, and what inflection points are observable?
+
 **ETL Pipeline Details**
+
 **1- Data Ingestion**
 Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Bucket using the AWS CLI or the S3 console.
 A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
+
 **Cleaning & Transformation (PySpark / AWS Glue)**
+
 1- Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
 2- Standardize timestamp fields: parse Start_Time and End_Time to UTC, then extract derived columns: hour, day_of_week, month, and year.
 3- Normalize free-text fields: apply .trim().lower() to Weather_Condition and City, then map common variant spellings to canonical values (e.g., "Light Rain" → "light rain").
@@ -90,12 +94,14 @@ A Glue Crawler is configured to scan the raw bucket and automatically infer and 
 5- Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
 
 **Feature Engineering**
+
 1- duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
 2- is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
 3- severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
 4- season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
 
 **Output**
+
 - Write the transformed dataset to the S3 Processed Bucket in Parquet format, partitioned by state then year (e.g., s3://processed-bucket/accidents/state=CA/year=2022/).
 - A second Glue Crawler runs post-ETL to update the Data Catalog with all new partitions, ensuring Athena queries immediately reflect the latest data without requiring manual partition registration.
   
@@ -114,6 +120,7 @@ SELECT hour, COUNT(*) AS accidents,
 FROM accidents_processed
 GROUP BY hour
 ORDER BY hour;
+
 **- Weather Condition vs. High Severity**
 SELECT weather_condition,
        COUNT(*) AS total,
@@ -144,6 +151,7 @@ The Amazon QuickSight dashboard serves as the primary analytical interface for n
 - Kaggle API access to download the US Accidents dataset.
 - 
 **- Deployment Steps**
+  
 - Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
 - Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
 - Create S3 buckets — Run bash infrastructure/s3_setup.sh to provision and configure the raw and processed S3 buckets with appropriate policies.
