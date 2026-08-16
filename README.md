@@ -28,7 +28,7 @@ To support the project's analytical goals, the raw CSV files were ingested into 
 1.	Bronze Layer: Raw CSV files loaded into Amazon S3 and preserved in their original form
 2.	Silver Layer: Transformed into cleaned and enriched Parquet format, partitioned by accident year and state
 3.	Gold Layer: Pre-aggregated analytical tables optimized for business intelligence queries
-4.	
+   
 **Data Quality Validation**
 During validation, the project confirmed:
 •	Zero duplicate IDs across all 7.7 million records, ensuring primary-key integrity
@@ -72,12 +72,12 @@ us-traffic-accident-analysis/
 └── .gitignore
 
 **Key Analytical Questions**
-1- Severity Distribution — What proportion of accidents fall into each severity tier (1–4), and how does the distribution vary across states and years?
-2- Geographic Hotspots — Which states and cities exhibit the highest accident rates per capita, and do hotspots persist across multiple years?
-3- Temporal Patterns — How do accident frequencies vary by hour of day, day of week, and month or season, and what drives peak periods?
-4- Weather Impact — Which weather conditions (e.g., fog, ice, rain) correlate most strongly with high-severity accidents, controlling for exposure?
-5- Road Feature Correlation — Do the presence of junctions, crossings, and traffic signals meaningfully increase or decrease accident severity outcomes?
-6- Year-over-Year Trends — How has the national accident rate and average severity evolved from 2016 to 2023, and what inflection points are observable?
+1. Severity Distribution — What proportion of accidents fall into each severity tier (1–4), and how does the distribution vary across states and years?
+2. Geographic Hotspots — Which states and cities exhibit the highest accident rates per capita, and do hotspots persist across multiple years?
+3. Temporal Patterns — How do accident frequencies vary by hour of day, day of week, and month or season, and what drives peak periods?
+4. Weather Impact — Which weather conditions (e.g., fog, ice, rain) correlate most strongly with high-severity accidents, controlling for exposure?
+5. Road Feature Correlation — Do the presence of junctions, crossings, and traffic signals meaningfully increase or decrease accident severity outcomes?
+6. Year-over-Year Trends — How has the national accident rate and average severity evolved from 2016 to 2023, and what inflection points are observable?
 
 **ETL Pipeline Details**
 
@@ -86,19 +86,17 @@ Upload the raw CSV file (US_Accidents_March23.csv) to the designated S3 Raw Buck
 A Glue Crawler is configured to scan the raw bucket and automatically infer and register the schema in the AWS Glue Data Catalog, making the dataset immediately accessible to downstream Glue jobs and Athena.
 
 **Cleaning & Transformation (PySpark / AWS Glue)**
-
-1- Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
-2- Standardize timestamp fields: parse Start_Time and End_Time to UTC, then extract derived columns: hour, day_of_week, month, and year.
-3- Normalize free-text fields: apply .trim().lower() to Weather_Condition and City, then map common variant spellings to canonical values (e.g., "Light Rain" → "light rain").
-4- Cast all boolean road-feature columns (Junction, Traffic_Signal, Crossing, etc.) from string to native boolean type.
-5- Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
+1. Drop all records where Severity, Start_Time, or State are null, as these are non-negotiable fields for all analytical queries.
+2. Standardize timestamp fields: parse Start_Time and End_Time to UTC, then extract derived columns: hour, day_of_week, month, and year.
+3. Normalize free-text fields: apply .trim().lower() to Weather_Condition and City, then map common variant spellings to canonical values (e.g., "Light Rain" → "light rain").
+4. Cast all boolean road-feature columns (Junction, Traffic_Signal, Crossing, etc.) from string to native boolean type.
+5. Filter dataset to the contiguous 48 states plus DC; exclude Alaska, Hawaii, and any unrecognized state codes.
 
 **Feature Engineering**
-
-1- duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
-2- is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
-3- severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
-4- season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
+1. duration_minutes — Computed as the difference between End_Time and Start_Time in minutes; records with negative durations are flagged and excluded.
+2. is_rush_hour — Boolean flag set to TRUE for accidents occurring between 6–9 AM or 4–7 PM on weekdays.
+3. severity_label — Human-readable string mapped from the ordinal scale: 1 → Low, 2 → Moderate, 3 → High, 4 → Critical.
+4. season — Derived from month: Winter (Dec–Feb), Spring (Mar–May), Summer (Jun–Aug), Fall (Sep–Nov).
 
 **Output**
 
@@ -121,7 +119,7 @@ FROM accidents_processed
 GROUP BY hour
 ORDER BY hour;
 
-**- Weather Condition vs. High Severity**
+** Weather Condition vs. High Severity**
 SELECT weather_condition,
        COUNT(*) AS total,
        SUM(CASE WHEN severity >= 3 THEN 1 ELSE 0 END) AS high_severity,
