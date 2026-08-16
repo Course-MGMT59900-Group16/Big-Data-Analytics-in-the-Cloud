@@ -45,7 +45,7 @@ Figure 1: Medallion Architecture Implementation: Ingestion to Visualization
 The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catalogs its schema into the AWS Glue Data Catalog. The registered AWS Glue ETL job — written in PySpark — reads from the raw bucket, performs cleaning, standardization, and feature engineering, and writes columnar Parquet output partitioned by state and year to the S3 Processed Bucket. A second Glue Crawler refreshes the Data Catalog to reflect new partitions, making them immediately queryable in Amazon Athena using standard SQL—no infrastructure to provision. Analytical results and aggregated query outputs are connected to Amazon QuickSight for dashboard-level visualization. Glue Workflows and Triggers automate the entire pipeline, and all job logs and metrics stream to AWS CloudWatch for observability and alerting.
 
 **Project Structure**
-us-traffic-accident-analysis/
+- us-traffic-accident-analysis/
 - ├── data/
 - │   └── raw/                        # Original dataset (not tracked in git)
 - ├── glue_jobs/
@@ -103,32 +103,131 @@ A Glue Crawler is configured to scan the raw bucket and automatically infer and 
 - Write the transformed dataset to the S3 Processed Bucket in Parquet format, partitioned by state then year (e.g., s3://processed-bucket/accidents/state=CA/year=2022/).
 - A second Glue Crawler runs post-ETL to update the Data Catalog with all new partitions, ensuring Athena queries immediately reflect the latest data without requiring manual partition registration.
   
-**Sample Athena Queries**
+**Sample Athena Queries and result**
+1. Athena Query 1: Accident Trend Over Time to identify year-over-year accident volume trends
+- Accident Trend Over Time to identify year-over-year accident volume trends
   
-**- Top 10 States by Accident Count**
-SELECT state, COUNT(*) AS accident_count
-FROM accidents_processed
-GROUP BY state
-ORDER BY accident_count DESC
-LIMIT 10;
+SELECT
+    accident_year,
+    COUNT(*) AS total_accidents
+FROM group16_accidents.silver_us_accidents
+WHERE accident_year <> '2023'
+GROUP BY accident_year
+ORDER BY accident_year;
+- Annual Accident Trends (2016-2022)
+<img width="783" height="201" alt="image" src="https://github.com/user-attachments/assets/d6f2f044-99d4-43bb-a17d-ee2a90dc60ef" />
 
-**- Hourly Accident Distribution**
-SELECT hour, COUNT(*) AS accidents,
-       ROUND(AVG(CAST(severity AS DOUBLE)), 2) AS avg_severity
-FROM accidents_processed
-GROUP BY hour
-ORDER BY hour;
 
-** Weather Condition vs. High Severity**
-SELECT weather_condition,
-       COUNT(*) AS total,
-       SUM(CASE WHEN severity >= 3 THEN 1 ELSE 0 END) AS high_severity,
-       ROUND(100.0 * SUM(CASE WHEN severity >= 3 THEN 1 ELSE 0 END) / COUNT(*), 1) AS pct_high
-FROM accidents_processed
-WHERE weather_condition IS NOT NULL
-GROUP BY weather_condition
-ORDER BY pct_high DESC
-LIMIT 15;
+Insight: Accident volume increased steadily from 2016 to 2022, with 2022 recording the highest count at 1.76 million incidents, a 329% increase over 2016 levels.
+
+2. Athena Query 2: Seasonal Patterns to identify monthly and seasonal accident patterns with severity rates
+SELECT
+    accident_month,
+    COUNT(*) AS total_accidents,
+    ROUND(
+        100.0 * SUM(high_impact) / COUNT(*),
+        2
+    ) AS high_impact_pct
+FROM group16_accidents.silver_us_accidents
+WHERE accident_year <> '2023'
+GROUP BY accident_month
+ORDER BY accident_month;
+<img width="626" height="348" alt="image" src="https://github.com/user-attachments/assets/cb35d1b5-cdc7-490e-91bc-5760608acc1f" />
+- Monthly Accident Patterns and Severity Rates
+<img width="622" height="313" alt="image" src="https://github.com/user-attachments/assets/ad08222d-57ae-40cb-8d00-2d875f95b740" />
+
+- Seasonal Aggregation Query
+
+SELECT
+    CASE
+        WHEN accident_month IN (12,1,2) THEN 'Winter'
+        WHEN accident_month IN (3,4,5) THEN 'Spring'
+        WHEN accident_month IN (6,7,8) THEN 'Summer'
+        WHEN accident_month IN (9,10,11) THEN 'Fall'
+    END AS season,
+    COUNT(*) AS total_accidents,
+    ROUND(
+        100.0 * SUM(high_impact) / COUNT(*),
+        2
+    ) AS high_impact_pct
+FROM group16_accidents.silver_us_accidents
+WHERE accident_year <> '2023'
+GROUP BY 1
+ORDER BY total_accidents DESC;
+- Seasonal Accident Patterns and Severity Rates
+<img width="761" height="133" alt="image" src="https://github.com/user-attachments/assets/163cf4e0-48ea-4734-9fd1-385bd211548a" />
+Key Insight: While fall and winter account for the highest accident volumes, summer experiences the highest severe disruption rate (23.06%).  
+3. Athena Query 3: Day-of-Week Patterns to identify accident patterns by day of week
+
+ SELECT
+    accident_weekday,
+    COUNT(*) AS total_accidents,
+    ROUND(
+        100.0 * SUM(high_impact) / COUNT(*),
+        2
+    ) AS high_impact_pct
+FROM group16_accidents.silver_us_accidents
+GROUP BY accident_weekday
+ORDER BY total_accidents DESC;
+- Day-of-Week Accident Patterns
+<img width="759" height="234" alt="image" src="https://github.com/user-attachments/assets/715b3156-e0bd-4391-ba90-c1ea4905f243" />
+Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
+4. Athena Query 4: Hour-of-Day Patterns to identify commute-hour accident patterns
+  
+SELECT
+    accident_hour,
+    COUNT(*) AS total_accidents,
+    ROUND(
+        100.0 * SUM(high_impact) / COUNT(*),
+        2
+    ) AS high_impact_pct
+FROM group16_accidents.silver_us_accidents
+GROUP BY accident_hour
+ORDER BY accident_hour;
+
+- Hourly Accident Patterns and Severity Rates
+<img width="766" height="587" alt="image" src="https://github.com/user-attachments/assets/e02b42c7-26a3-4e08-b0fe-a8a2fbae56fe" />
+
+<img width="766" height="587" alt="image" src="https://github.com/user-attachments/assets/5ec1606c-01e9-4007-995d-7d4a191082c6" />
+
+4- Athena Query 5: Roadway Feature Associations to identify roadway infrastructure risk factors
+SELECT
+    'Junction' AS roadway_feature,
+    SUM(CASE WHEN junction THEN 1 ELSE 0 END) AS accidents_near_feature,
+    ROUND(
+        100.0 * SUM(CASE WHEN junction AND high_impact = 1 THEN 1 ELSE 0 END)
+        / NULLIF(SUM(CASE WHEN junction THEN 1 ELSE 0 END), 0),
+        2
+    ) AS high_impact_pct
+
+FROM group16_accidents.silver_us_accidents
+
+UNION ALL
+
+SELECT
+    'Traffic Signal',
+    SUM(CASE WHEN traffic_signal THEN 1 ELSE 0 END),
+    ROUND(
+        100.0 * SUM(CASE WHEN traffic_signal AND high_impact = 1 THEN 1 ELSE 0 END)
+        / NULLIF(SUM(CASE WHEN traffic_signal THEN 1 ELSE 0 END), 0),
+        2
+    )
+FROM group16_accidents.silver_us_accidents
+
+UNION ALL
+
+SELECT
+    'Crossing',
+    SUM(CASE WHEN crossing THEN 1 ELSE 0 END),
+    ROUND(
+        100.0 * SUM(CASE WHEN crossing AND high_impact = 1 THEN 1 ELSE 0 END)
+        / NULLIF(SUM(CASE WHEN crossing THEN 1 ELSE 0 END), 0),
+        2
+    )
+
+- Roadway Feature Risk Analysis
+<img width="759" height="105" alt="image" src="https://github.com/user-attachments/assets/577ea764-459c-4940-b63a-f9765921df89" />
+Key Insight: Junctions have the highest severe disruption rate (26.79%), far exceeding traffic signals (9.51%) and crossings (7.04%).   
 
 **QuickSight Dashboard**
 The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
@@ -140,7 +239,7 @@ The Amazon QuickSight dashboard serves as the primary analytical interface for n
 - Line Charts:	Monthly accident trend from 2016 to 2023; year-over-year comparison overlay for multi-year analysis.
 - Heat Map:	Two-dimensional grid of hour of day (rows) vs. day of week (columns) showing accident frequency intensity.
 - Interactive Filters:	State, Year, Severity (multi-select), and Weather Condition — applied globally across all dashboard visuals.
-- 
+  
 **-Setup & Deployment**
 -** Prerequisites**
 - Active AWS account with IAM permissions for S3, Glue, Athena, QuickSight, and CloudWatch.
