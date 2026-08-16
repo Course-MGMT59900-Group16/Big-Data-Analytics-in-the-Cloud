@@ -37,7 +37,7 @@ This project delivers a cloud-native, end-to-end big data pipeline designed to a
 
 The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
 
-- **Component and	Description**
+**Component and	Description**
 - KPI Cards:	Total Accidents, Average Severity, Most Affected State, and Peak Hour of Day — displayed as large-format summary tiles at the top of the dashboard.
 - Choropleth Map:	Geospatial heat map of accident density by state, color-coded from low (light) to high (dark navy) frequency.
 - Bar Charts:	Top 20 cities ranked by total accidents; stacked bar chart showing severity breakdown (1–4) per state.
@@ -60,9 +60,7 @@ This multi-source integration ensures broad coverage and high temporal resolutio
 **Data Attributes**
 
 The dataset contains 46 attributes, each contributing to a multidimensional understanding of accident conditions:
-
-- Data Attributes
-  
+ 
 1. Identifiers:	Accident ID (unique identifier)
 2. Spatial Fields:	Start_Lat, Start_Lng (geographic coordinates)
 3. Temporal Fields:	Start_Time, End_Time, accident_year, accident_month, accident_hour, accident_weekday
@@ -72,7 +70,9 @@ The dataset contains 46 attributes, each contributing to a multidimensional unde
 7. Additional Features:	Twilight indicators, amenity markers, airport, bump, stop sign
 
 **Cloud Ingestion Strategy**
+
 To support the project's analytical goals, the raw CSV files were ingested into a cloud-native medallion architecture built on Amazon Web Services (AWS):
+
 1.	Bronze Layer: Raw CSV files loaded into Amazon S3 and preserved in their original form
 2.	Silver Layer: Transformed into cleaned and enriched Parquet format, partitioned by accident year and state
 3.	Gold Layer: Pre-aggregated analytical tables optimized for business intelligence queries
