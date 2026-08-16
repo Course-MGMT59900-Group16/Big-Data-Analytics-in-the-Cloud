@@ -120,12 +120,12 @@ The raw CSV dataset is uploaded to the S3 Raw Bucket, where a Glue Crawler catal
 - └── .gitignore
 
 **Key Analytical Questions**
-1. Severity Distribution — What proportion of accidents fall into each severity tier (1–4), and how does the distribution vary across states and years?
-2. Geographic Hotspots — Which states and cities exhibit the highest accident rates per capita, and do hotspots persist across multiple years?
-3. Temporal Patterns — How do accident frequencies vary by hour of day, day of week, and month or season, and what drives peak periods?
-4. Weather Impact — Which weather conditions (e.g., fog, ice, rain) correlate most strongly with high-severity accidents, controlling for exposure?
-5. Road Feature Correlation — Do the presence of junctions, crossings, and traffic signals meaningfully increase or decrease accident severity outcomes?
-6. Year-over-Year Trends — How has the national accident rate and average severity evolved from 2016 to 2023, and what inflection points are observable?
+1. Severity Distribution: What proportion of accidents fall into each severity tier (1–4), and how does the distribution vary across states and years?
+2. Geographic Hotspots: Which states and cities exhibit the highest accident rates per capita, and do hotspots persist across multiple years?
+3. Temporal Patterns: How do accident frequencies vary by hour of day, day of week, and month or season, and what drives peak periods?
+4. Weather Impact: Which weather conditions (e.g., fog, ice, rain) correlate most strongly with high-severity accidents, controlling for exposure?
+5. Road Feature Correlation: Do the presence of junctions, crossings, and traffic signals meaningfully increase or decrease accident severity outcomes?
+6. Year-over-Year Trends: How has the national accident rate and average severity evolved from 2016 to 2023, and what inflection points are observable?
 
 **ETL Pipeline Details**
 
