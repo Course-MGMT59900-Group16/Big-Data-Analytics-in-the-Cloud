@@ -1,5 +1,6 @@
 # Big-Data-Analytics-in-the-Cloud
 Cloud-Based Analysis of U.S. Traffic Accident Patterns
+
 **Project Overview:** 
 This project delivers a cloud-native, end-to-end big data pipeline designed to analyze U.S. traffic accident data at scale, leveraging the full breadth of the AWS ecosystem. The primary goal is to transform raw accident records into actionable intelligence covering accident severity, geographic distribution, temporal patterns, and the influence of weather and road conditions on crash outcomes. The analysis is grounded in the US Accidents dataset (Kaggle / Sobhan Moosavi et al.), comprising approximately 7.7 million records spanning 49 U.S. states from 2016 to 2023 across 46 feature columns. The pipeline progresses through four well-defined phases — raw data ingestion into Amazon S3, distributed ETL transformation via AWS Glue (PySpark), serverless SQL querying with Amazon Athena, and interactive visualization through Amazon QuickSight — culminating in a reproducible, scalable analytical platform suitable for academic evaluation, operational deployment, and further extension.
 
@@ -103,7 +104,7 @@ A Glue Crawler is configured to scan the raw bucket and automatically infer and 
 - Write the transformed dataset to the S3 Processed Bucket in Parquet format, partitioned by state then year (e.g., s3://processed-bucket/accidents/state=CA/year=2022/).
 - A second Glue Crawler runs post-ETL to update the Data Catalog with all new partitions, ensuring Athena queries immediately reflect the latest data without requiring manual partition registration.
   
-**Sample Athena Queries and result**
+**Sample Athena Queries and results **
 1. Athena Query 1: Accident Trend Over Time to identify year-over-year accident volume trends
 - Accident Trend Over Time to identify year-over-year accident volume trends
   
@@ -117,8 +118,7 @@ ORDER BY accident_year;
 - Annual Accident Trends (2016-2022)
 <img width="783" height="201" alt="image" src="https://github.com/user-attachments/assets/d6f2f044-99d4-43bb-a17d-ee2a90dc60ef" />
 
-
-Insight: Accident volume increased steadily from 2016 to 2022, with 2022 recording the highest count at 1.76 million incidents, a 329% increase over 2016 levels.
+- Insight: Accident volume increased steadily from 2016 to 2022, with 2022 recording the highest count at 1.76 million incidents, a 329% increase over 2016 levels.
 
 2. Athena Query 2: Seasonal Patterns to identify monthly and seasonal accident patterns with severity rates
 SELECT
@@ -156,7 +156,8 @@ GROUP BY 1
 ORDER BY total_accidents DESC;
 - Seasonal Accident Patterns and Severity Rates
 <img width="761" height="133" alt="image" src="https://github.com/user-attachments/assets/163cf4e0-48ea-4734-9fd1-385bd211548a" />
-Key Insight: While fall and winter account for the highest accident volumes, summer experiences the highest severe disruption rate (23.06%).  
+- Key Insight: While fall and winter account for the highest accident volumes, summer experiences the highest severe disruption rate (23.06%).
+   
 3. Athena Query 3: Day-of-Week Patterns to identify accident patterns by day of week
 
  SELECT
@@ -171,7 +172,8 @@ GROUP BY accident_weekday
 ORDER BY total_accidents DESC;
 - Day-of-Week Accident Patterns
 <img width="759" height="234" alt="image" src="https://github.com/user-attachments/assets/715b3156-e0bd-4391-ba90-c1ea4905f243" />
-Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
+- Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
+  
 4. Athena Query 4: Hour-of-Day Patterns to identify commute-hour accident patterns
   
 SELECT
@@ -187,10 +189,10 @@ ORDER BY accident_hour;
 
 - Hourly Accident Patterns and Severity Rates
 <img width="766" height="587" alt="image" src="https://github.com/user-attachments/assets/e02b42c7-26a3-4e08-b0fe-a8a2fbae56fe" />
+- Key Insight: Rush-hour periods (7-8 AM, 4-5 PM) account for largest accident volumes, but late-night/early-morning hours (4 AM) have the highest severity rates (21.40%).
+  
+5- Athena Query 5: Roadway Feature Associations to identify roadway infrastructure risk factors
 
-<img width="766" height="587" alt="image" src="https://github.com/user-attachments/assets/5ec1606c-01e9-4007-995d-7d4a191082c6" />
-
-4- Athena Query 5: Roadway Feature Associations to identify roadway infrastructure risk factors
 SELECT
     'Junction' AS roadway_feature,
     SUM(CASE WHEN junction THEN 1 ELSE 0 END) AS accidents_near_feature,
@@ -226,6 +228,7 @@ SELECT
     )
 
 - Roadway Feature Risk Analysis
+  
 <img width="759" height="105" alt="image" src="https://github.com/user-attachments/assets/577ea764-459c-4940-b63a-f9765921df89" />
 Key Insight: Junctions have the highest severe disruption rate (26.79%), far exceeding traffic signals (9.51%) and crossings (7.04%).   
 
