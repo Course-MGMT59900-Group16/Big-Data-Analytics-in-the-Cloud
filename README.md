@@ -230,7 +230,7 @@ ORDER BY total_accidents DESC;
 
 - Key Insight: Friday leads in accident volume, but Sunday has the highest severe disruption rate (22.33%), despite lower traffic volume.
 
-- ** Athena Query 4**: Hour-of-Day Patterns to identify commute-hour accident patterns
+- **Athena Query 4**: Hour-of-Day Patterns to identify commute-hour accident patterns
   
 SELECT
     accident_hour,
@@ -248,7 +248,7 @@ ORDER BY accident_hour;
 
 - Key Insight: Rush-hour periods (7-8 AM, 4-5 PM) account for largest accident volumes, but late-night/early-morning hours (4 AM) have the highest severity rates (21.40%).
   
-- ** Athena Query 5**: Roadway Feature Associations to identify roadway infrastructure risk factors
+- **Athena Query 5**: Roadway Feature Associations to identify roadway infrastructure risk factors
 
 SELECT
     'Junction' AS roadway_feature,
