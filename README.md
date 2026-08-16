@@ -12,13 +12,13 @@ This project delivers a cloud-native, end-to-end big data pipeline designed to a
   
 **Deployment Steps**
   
-- Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
-- Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
-- Create S3 buckets — Run bash infrastructure/s3_setup.sh to provision and configure the raw and processed S3 buckets with appropriate policies.
-- Register Glue jobs — Run python infrastructure/glue_setup.py to register Glue crawlers, upload PySpark job scripts to S3, and create Glue job definitions.
-- Run ETL job — Trigger the ETL job from the AWS Glue console or via CLI: aws glue start-job-run --job-name etl_clean_transform.
-- Query with Athena — Open the Athena console, execute athena/create_tables.sql to register external tables, then run queries from athena/analysis_queries.sql.
-- Connect QuickSight — In the QuickSight console, create a new Athena data source pointing to the accidents_processed table; import or recreate the dashboard using quicksight/dashboard_config.json.
+- Clone the repository: Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
+- Download dataset: Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
+- Create S3 buckets: Run bash infrastructure/s3_setup.sh to provision and configure the raw and processed S3 buckets with appropriate policies.
+- Register Glue jobs: Run python infrastructure/glue_setup.py to register Glue crawlers, upload PySpark job scripts to S3, and create Glue job definitions.
+- Run ETL job: Trigger the ETL job from the AWS Glue console or via CLI: aws glue start-job-run --job-name etl_clean_transform.
+- Query with Athena: Open the Athena console, execute athena/create_tables.sql to register external tables, then run queries from athena/analysis_queries.sql.
+- Connect QuickSight: In the QuickSight console, create a new Athena data source pointing to the accidents_processed table; import or recreate the dashboard using quicksight/dashboard_config.json.
 
 **Technology	Role in Project**
 - Python 3.10	ETL scripting, infrastructure automation, and Jupyter notebooks
