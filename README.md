@@ -294,27 +294,37 @@ SELECT
 - **Engineering Performance and Efficiency**: The two-tier partitioning scheme, based on accident year and state subdirectories, enables extreme partition pruning and faster columnar query performance, dramatically reducing Athena query costs.
   
 - Engineering Performance and Efficiency
+  
 <img width="682" height="94" alt="image" src="https://github.com/user-attachments/assets/99fbc9af-0cb4-42fc-aa79-26f6833fcdf9" />
 
 - **Seasonal Volume vs. High-Impact Disruption**: Key Insight: Raw accident volume does not directly correlate with traffic impact severity. While fall and winter account for over 4.1 million combined incidents, summer experiences the highest relative rate of high-impact severe traffic disruptions at approximately 23.06%.
+  
 - Seasonal Volume vs. High-Impact Disruption
+  
 <img width="765" height="176" alt="image" src="https://github.com/user-attachments/assets/e6a82b35-2187-430f-968a-7922eda78211" />
 
 - Engineering Performance and Efficiency
+  
 <img width="975" height="504" alt="image" src="https://github.com/user-attachments/assets/3ae16771-0898-4803-b47e-5fe3592f3d00" />
+
 - Key Insight: Raw accident volume does not directly correlate with traffic impact severity. While fall and winter account for over 4.1 million combined incidents, summer experiences the highest relative rate of high-impact severe traffic disruptions at approximately 23.06%.
+  
 -** Day-of-Week and Hourly Commute Dynamics**
+
 <img width="768" height="134" alt="image" src="https://github.com/user-attachments/assets/c0cc4835-76cc-4a97-8652-061a20d094db" />
 
 - Weekday vs. Weekend Comparison and Hourly Commute Dynamics
+  
 <img width="975" height="392" alt="image" src="https://github.com/user-attachments/assets/8634219c-2ced-4d0c-a4fc-5f22387c49f0" />
 
 - Weekday mornings and evenings coincide with traditional commute hours, while weekends, particularly Sunday, show lower traffic volumes but heightened accident severity. The late-night and early-morning spike in severity suggests risk factors such as driver fatigue, impaired driving, or reduced emergency response times.
 
 **- State Geographic Hotspots and Disruption Severity**
+
 <img width="764" height="188" alt="image" src="https://github.com/user-attachments/assets/d3c51d35-b7ee-497e-9454-cfdd55f73309" />
 
 - Geographic Hotspot Map
+  
 <img width="975" height="379" alt="image" src="https://github.com/user-attachments/assets/8461bfe2-2dd1-453a-9203-25e51da783b0" />
 
 - Key Insight: High-population states (CA, FL) lead in total accident count, but states like New York (23.22%), Virginia (22.92%), and Texas (21.90%) experience significantly larger proportions of high-impact traffic disruptions. These regional variations are vital for allocating transportation infrastructure and emergency response resources effectively.
@@ -322,8 +332,11 @@ SELECT
 **- Environmental and Roadway Feature Associations**
 
 - Evaluating environmental factors and roadway infrastructure, the team observed notable associations between specific driving conditions and severity rates. Overcast and scattered cloudy skies showed the highest high-impact disruption percentages (34.95%–35.16%), while highway junctions showed far higher severe disruption rates (26.79%) than standard traffic signals (9.51%) or pedestrian crossings (7.04%). The speakers emphasize that these correlations highlight compounding disruption risks rather than direct causation.
+  
 <img width="760" height="149" alt="image" src="https://github.com/user-attachments/assets/f46d5eef-57df-41af-b1ca-cd28eea672fc" />
+
 - Feature Association Chart
+  
 <img width="975" height="434" alt="image" src="https://github.com/user-attachments/assets/4f168477-0aaf-4257-a550-8423d2eae828" />
 
 - Key Insight: Overcast and scattered cloudy skies show the highest high-impact disruption percentages (34.95-35.16%), while highway junctions show far higher severe disruption rates (26.79%) than standard traffic signals (9.51%) or pedestrian crossings (7.04%). These correlations highlight compounding disruption risks rather than direct causation.
