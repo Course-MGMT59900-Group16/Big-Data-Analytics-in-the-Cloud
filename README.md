@@ -3,7 +3,47 @@ Cloud-Based Analysis of U.S. Traffic Accident Patterns
 
 **Project Overview:** 
 This project delivers a cloud-native, end-to-end big data pipeline designed to analyze U.S. traffic accident data at scale, leveraging the full breadth of the AWS ecosystem. The primary goal is to transform raw accident records into actionable intelligence covering accident severity, geographic distribution, temporal patterns, and the influence of weather and road conditions on crash outcomes. The analysis is grounded in the US Accidents dataset (Kaggle / Sobhan Moosavi et al.), comprising approximately 7.7 million records spanning 49 U.S. states from 2016 to 2023 across 46 feature columns. The pipeline progresses through four well-defined phases — raw data ingestion into Amazon S3, distributed ETL transformation via AWS Glue (PySpark), serverless SQL querying with Amazon Athena, and interactive visualization through Amazon QuickSight — culminating in a reproducible, scalable analytical platform suitable for academic evaluation, operational deployment, and further extension.
+  
+**-Setup & Deployment**
+-** Prerequisites**
+- Active AWS account with IAM permissions for S3, Glue, Athena, QuickSight, and CloudWatch.
+- Python 3.8+ with the following packages: boto3, pyspark, pandas, pyarrow.
+- AWS CLI installed and configured via aws configure with appropriate access key and region.
+- Kaggle API access to download the US Accidents dataset.
+- 
+**- Deployment Steps**
+  
+- Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
+- Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
+- Create S3 buckets — Run bash infrastructure/s3_setup.sh to provision and configure the raw and processed S3 buckets with appropriate policies.
+- Register Glue jobs — Run python infrastructure/glue_setup.py to register Glue crawlers, upload PySpark job scripts to S3, and create Glue job definitions.
+- Run ETL job — Trigger the ETL job from the AWS Glue console or via CLI: aws glue start-job-run --job-name etl_clean_transform.
+- Query with Athena — Open the Athena console, execute athena/create_tables.sql to register external tables, then run queries from athena/analysis_queries.sql.
+- Connect QuickSight — In the QuickSight console, create a new Athena data source pointing to the accidents_processed table; import or recreate the dashboard using quicksight/dashboard_config.json.
 
+**Technology	Role in Project**
+- Python 3.10	ETL scripting, infrastructure automation, and Jupyter notebooks
+- Apache Spark (PySpark)	Distributed data transformation at scale within AWS Glue runtime
+- AWS S3	Durable object storage for raw CSV input and processed Parquet output
+- AWS Glue	Serverless ETL orchestration, Crawler-based schema discovery, and Data Catalog management
+- Amazon Athena	Serverless, pay-per-query SQL analytics engine over S3-resident Parquet files
+- Amazon QuickSight	Cloud-native BI and dashboarding platform for interactive visual analytics
+- AWS CloudWatch	Centralized monitoring, structured logging, and threshold-based alerting for Glue jobs
+- AWS IAM	Granular access control and least-privilege security for all AWS service interactions
+- Parquet	Columnar storage format enabling predicate pushdown and efficient compression on S3
+- SQL	Ad-hoc analytical querying and view creation within Amazon Athena
+  
+**QuickSight Dashboard**
+The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
+
+- **Component and	Description**
+- KPI Cards:	Total Accidents, Average Severity, Most Affected State, and Peak Hour of Day — displayed as large-format summary tiles at the top of the dashboard.
+- Choropleth Map:	Geospatial heat map of accident density by state, color-coded from low (light) to high (dark navy) frequency.
+- Bar Charts:	Top 20 cities ranked by total accidents; stacked bar chart showing severity breakdown (1–4) per state.
+- Line Charts:	Monthly accident trend from 2016 to 2023; year-over-year comparison overlay for multi-year analysis.
+- Heat Map:	Two-dimensional grid of hour of day (rows) vs. day of week (columns) showing accident frequency intensity.
+- Interactive Filters:	State, Year, Severity (multi-select), and Weather Condition — applied globally across all dashboard visuals.
+  
 **Dataset**
 The dataset used in this project is the U.S. Accidents (2016–2023) dataset, a large-scale nationwide traffic incident repository containing 7,728,394 accident records collected from February 2016 through March 2023. It provides a comprehensive view of roadway incidents across 49 U.S. states, capturing detailed information on accident severity, timestamps, geographic coordinates, roadway characteristics, and weather conditions. The dataset was originally published on Kaggle and aggregates real-time traffic incident feeds from multiple APIs, including:
 
@@ -249,61 +289,60 @@ SELECT
 
 - Key Insight: Junctions have the highest severe disruption rate (26.79%), far exceeding traffic signals (9.51%) and crossings (7.04%).   
 
-**QuickSight Dashboard**
-The Amazon QuickSight dashboard serves as the primary analytical interface for non-technical stakeholders and executive audiences. It is connected directly to the Athena data source and refreshes automatically upon pipeline completion. The dashboard is composed of the following components:
-
-- **Component and	Description**
-- KPI Cards:	Total Accidents, Average Severity, Most Affected State, and Peak Hour of Day — displayed as large-format summary tiles at the top of the dashboard.
-- Choropleth Map:	Geospatial heat map of accident density by state, color-coded from low (light) to high (dark navy) frequency.
-- Bar Charts:	Top 20 cities ranked by total accidents; stacked bar chart showing severity breakdown (1–4) per state.
-- Line Charts:	Monthly accident trend from 2016 to 2023; year-over-year comparison overlay for multi-year analysis.
-- Heat Map:	Two-dimensional grid of hour of day (rows) vs. day of week (columns) showing accident frequency intensity.
-- Interactive Filters:	State, Year, Severity (multi-select), and Weather Condition — applied globally across all dashboard visuals.
+**Key findings, insights, or analytics results**
+- **Engineering Performance and Efficiency**: The two-tier partitioning scheme, based on accident year and state subdirectories, enables extreme partition pruning and faster columnar query performance, dramatically reducing Athena query costs.
   
-**-Setup & Deployment**
--** Prerequisites**
-- Active AWS account with IAM permissions for S3, Glue, Athena, QuickSight, and CloudWatch.
-- Python 3.8+ with the following packages: boto3, pyspark, pandas, pyarrow.
-- AWS CLI installed and configured via aws configure with appropriate access key and region.
-- Kaggle API access to download the US Accidents dataset.
+- Engineering Performance and Efficiency
+<img width="682" height="94" alt="image" src="https://github.com/user-attachments/assets/99fbc9af-0cb4-42fc-aa79-26f6833fcdf9" />
+
+- **Seasonal Volume vs. High-Impact Disruption**: Key Insight: Raw accident volume does not directly correlate with traffic impact severity. While fall and winter account for over 4.1 million combined incidents, summer experiences the highest relative rate of high-impact severe traffic disruptions at approximately 23.06%.
+- Seasonal Volume vs. High-Impact Disruption
+<img width="765" height="176" alt="image" src="https://github.com/user-attachments/assets/e6a82b35-2187-430f-968a-7922eda78211" />
+
+- Engineering Performance and Efficiency
+<img width="975" height="504" alt="image" src="https://github.com/user-attachments/assets/3ae16771-0898-4803-b47e-5fe3592f3d00" />
+- Key Insight: Raw accident volume does not directly correlate with traffic impact severity. While fall and winter account for over 4.1 million combined incidents, summer experiences the highest relative rate of high-impact severe traffic disruptions at approximately 23.06%.
+-** Day-of-Week and Hourly Commute Dynamics**
+<img width="768" height="134" alt="image" src="https://github.com/user-attachments/assets/c0cc4835-76cc-4a97-8652-061a20d094db" />
+
+- Weekday vs. Weekend Comparison and Hourly Commute Dynamics
+<img width="975" height="392" alt="image" src="https://github.com/user-attachments/assets/8634219c-2ced-4d0c-a4fc-5f22387c49f0" />
+
+- Weekday mornings and evenings coincide with traditional commute hours, while weekends, particularly Sunday, show lower traffic volumes but heightened accident severity. The late-night and early-morning spike in severity suggests risk factors such as driver fatigue, impaired driving, or reduced emergency response times.
+
+**- State Geographic Hotspots and Disruption Severity**
+<img width="764" height="188" alt="image" src="https://github.com/user-attachments/assets/d3c51d35-b7ee-497e-9454-cfdd55f73309" />
+
+- Geographic Hotspot Map
+<img width="975" height="379" alt="image" src="https://github.com/user-attachments/assets/8461bfe2-2dd1-453a-9203-25e51da783b0" />
+
+- Key Insight: High-population states (CA, FL) lead in total accident count, but states like New York (23.22%), Virginia (22.92%), and Texas (21.90%) experience significantly larger proportions of high-impact traffic disruptions. These regional variations are vital for allocating transportation infrastructure and emergency response resources effectively.
+
+**- Environmental and Roadway Feature Associations**
+
+- Evaluating environmental factors and roadway infrastructure, the team observed notable associations between specific driving conditions and severity rates. Overcast and scattered cloudy skies showed the highest high-impact disruption percentages (34.95%–35.16%), while highway junctions showed far higher severe disruption rates (26.79%) than standard traffic signals (9.51%) or pedestrian crossings (7.04%). The speakers emphasize that these correlations highlight compounding disruption risks rather than direct causation.
+<img width="760" height="149" alt="image" src="https://github.com/user-attachments/assets/f46d5eef-57df-41af-b1ca-cd28eea672fc" />
+- Feature Association Chart
+<img width="975" height="434" alt="image" src="https://github.com/user-attachments/assets/4f168477-0aaf-4257-a550-8423d2eae828" />
+
+- Key Insight: Overcast and scattered cloudy skies show the highest high-impact disruption percentages (34.95-35.16%), while highway junctions show far higher severe disruption rates (26.79%) than standard traffic signals (9.51%) or pedestrian crossings (7.04%). These correlations highlight compounding disruption risks rather than direct causation.
 - 
-**- Deployment Steps**
-  
-- Clone the repository — Execute git clone https://github.com/username/us-traffic-accident-analysis.git and navigate into the project directory.
-- Download dataset — Obtain US_Accidents_March23.csv from Kaggle and place it in data/raw/ (this directory is excluded from version control via .gitignore).
-- Create S3 buckets — Run bash infrastructure/s3_setup.sh to provision and configure the raw and processed S3 buckets with appropriate policies.
-- Register Glue jobs — Run python infrastructure/glue_setup.py to register Glue crawlers, upload PySpark job scripts to S3, and create Glue job definitions.
-- Run ETL job — Trigger the ETL job from the AWS Glue console or via CLI: aws glue start-job-run --job-name etl_clean_transform.
-- Query with Athena — Open the Athena console, execute athena/create_tables.sql to register external tables, then run queries from athena/analysis_queries.sql.
-- Connect QuickSight — In the QuickSight console, create a new Athena data source pointing to the accidents_processed table; import or recreate the dashboard using quicksight/dashboard_config.json.
-Technologies Used
+**- Key Takeaways and Future Work**
+1.	Cloud-Native Processing is Essential: Traditional desktop tools cannot handle 7.7 million records efficiently. Our serverless AWS pipeline achieved a 99.99% reduction in query scan volume through proper partition optimization.
+2.	Volume ≠ Severity: High-volume regions and periods do not necessarily correlate with severe disruptions. Transportation agencies must analyze both dimensions separately.
+3.	Peak accidents occur during rush hours, while off-peak hours and Sundays show higher severity rates, indicating different risk factors.
+4.	Infrastructure Matters: Junctions pose a dramatically higher severe disruption risk (26.79%) than traffic signals (9.51%), guiding infrastructure investment decisions.
+5.	Weather as a Multiplier: Overcast and scattered clouds significantly increase severity rates, likely due to reduced visibility and poor driving conditions.
 
-**Technology	Role in Project**
-- Python 3.10	ETL scripting, infrastructure automation, and Jupyter notebooks
-- Apache Spark (PySpark)	Distributed data transformation at scale within AWS Glue runtime
-- AWS S3	Durable object storage for raw CSV input and processed Parquet output
-- AWS Glue	Serverless ETL orchestration, Crawler-based schema discovery, and Data Catalog management
-- Amazon Athena	Serverless, pay-per-query SQL analytics engine over S3-resident Parquet files
-- Amazon QuickSight	Cloud-native BI and dashboarding platform for interactive visual analytics
-- AWS CloudWatch	Centralized monitoring, structured logging, and threshold-based alerting for Glue jobs
-- AWS IAM	Granular access control and least-privilege security for all AWS service interactions
-- Parquet	Columnar storage format enabling predicate pushdown and efficient compression on S3
-- SQL	Ad-hoc analytical querying and view creation within Amazon Athena
-  
-**Technologies Used**
-  
-**- Technology	Role in Project**
-- Python 3.10	ETL scripting, infrastructure automation, and Jupyter notebooks
-- Apache Spark (PySpark)	Distributed data transformation at scale within AWS Glue runtime
-- AWS S3	Durable object storage for raw CSV input and processed Parquet output
-- AWS Glue	Serverless ETL orchestration, Crawler-based schema discovery, and Data Catalog management
-- Amazon Athena	Serverless, pay-per-query SQL analytics engine over S3-resident Parquet files
-- Amazon QuickSight	Cloud-native BI and dashboarding platform for interactive visual analytics
-- AWS CloudWatch	Centralized monitoring, structured logging, and threshold-based alerting for Glue jobs
-- AWS IAM	Granular access control and least-privilege security for all AWS service interactions
-- Parquet	Columnar storage format enabling predicate pushdown and efficient compression on S3
-- SQL	Ad-hoc analytical querying and view creation within Amazon Athena
-  
+**- Limitations, risks, and future improvements**
+- Current Limitations and Risks
+<img width="769" height="278" alt="image" src="https://github.com/user-attachments/assets/f4e6b131-4791-4e4f-8ca2-b815dde13e09" />
+
+- Future Improvements Roadmap
+<img width="975" height="439" alt="image" src="https://github.com/user-attachments/assets/f48e8802-8537-497b-9a00-04a599190608" />
+- Future Improvements
+<img width="760" height="355" alt="image" src="https://github.com/user-attachments/assets/39cebc73-fb3f-4211-866f-faa777f08f2a" />
+
 **Future Enhancements**
 - Real-Time Streaming Integration — Integrate live traffic incident feeds via AWS Kinesis Data Streams and Kinesis Data Firehose to enable near-real-time accident alerting and streaming analytics alongside the historical batch pipeline.
 - ML Severity Prediction — Train a supervised classification model to predict accident severity at the time of incident using weather, location, and road feature inputs, leveraging Amazon SageMaker for training, tuning, and endpoint hosting.
