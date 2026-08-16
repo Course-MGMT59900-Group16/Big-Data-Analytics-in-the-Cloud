@@ -365,9 +365,9 @@ SELECT
 <img width="760" height="355" alt="image" src="https://github.com/user-attachments/assets/39cebc73-fb3f-4211-866f-faa777f08f2a" />
 
 **Future Enhancements**
-- Real-Time Streaming Integration — Integrate live traffic incident feeds via AWS Kinesis Data Streams and Kinesis Data Firehose to enable near-real-time accident alerting and streaming analytics alongside the historical batch pipeline.
-- ML Severity Prediction — Train a supervised classification model to predict accident severity at the time of incident using weather, location, and road feature inputs, leveraging Amazon SageMaker for training, tuning, and endpoint hosting.
-- Reverse Geocoding Enrichment — Apply reverse geocoding (e.g., via AWS Location Service or HERE API) to convert raw coordinates into enriched county, zip code, and congressional district metadata for finer-grained spatial analysis.
-- Automated Data Quality Checks — Embed pre- and post-ETL data quality validation using AWS Deequ or Great Expectations to enforce schema contracts, detect anomalies, and prevent corrupt data from reaching the processed layer.
-- Managed Workflow Orchestration — Migrate pipeline scheduling to Apache Airflow on Amazon MWAA (Managed Workflows for Apache Airflow) for richer DAG-based dependency management, retry logic, and cross-service orchestration beyond what Glue Triggers support natively.
-- REST API Exposure — Expose curated Athena query results and aggregated metrics through a REST API built on AWS Lambda and Amazon API Gateway, enabling programmatic access for third-party applications, mobile dashboards, and external research consumers.
+- Real-Time Streaming Integration: Integrate live traffic incident feeds via AWS Kinesis Data Streams and Kinesis Data Firehose to enable near-real-time accident alerting and streaming analytics alongside the historical batch pipeline.
+- ML Severity Prediction: Train a supervised classification model to predict accident severity at the time of incident using weather, location, and road feature inputs, leveraging Amazon SageMaker for training, tuning, and endpoint hosting.
+- Reverse Geocoding Enrichment: Apply reverse geocoding (e.g., via AWS Location Service or HERE API) to convert raw coordinates into enriched county, zip code, and congressional district metadata for finer-grained spatial analysis.
+- Automated Data Quality Checks: Embed pre- and post-ETL data quality validation using AWS Deequ or Great Expectations to enforce schema contracts, detect anomalies, and prevent corrupt data from reaching the processed layer.
+- Managed Workflow Orchestration: Migrate pipeline scheduling to Apache Airflow on Amazon MWAA (Managed Workflows for Apache Airflow) for richer DAG-based dependency management, retry logic, and cross-service orchestration beyond what Glue Triggers support natively.
+- REST API Exposure: Expose curated Athena query results and aggregated metrics through a REST API built on AWS Lambda and Amazon API Gateway, enabling programmatic access for third-party applications, mobile dashboards, and external research consumers.
